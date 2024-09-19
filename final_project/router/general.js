@@ -27,47 +27,96 @@ public_users.post("/register", (req, res) => {
 
 // Get the book list available in the shop
 public_users.get('/', function (req, res) {
-    res.send(JSON.stringify(books, null, 4));
+    let myPromise = new Promise((resolve, reject) => {
+        const result = JSON.stringify(books, null, 4);
+        resolve(result);
+    });
+    myPromise.then((result) => {
+        res.send(result);
+    }).catch((err) => {
+        return res.status(400).json({message: JSON.stringify(err)});
+    });
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', function (req, res) {
-    const book = getBookByISBN(req.params.isbn);
-    if (!(book === null)) {
-        res.send(JSON.stringify(book, null, 4));
-    } else {
-        res.status(404).json({message: "Book not found"});
-    }
+    let myPromise = new Promise((resolve, reject) => {
+        const book = getBookByISBN(req.params.isbn);
+        if (book !== null) {
+            const result = JSON.stringify(book, null, 4);
+            resolve(result);
+        } else {
+            let err = {"code": 404, "message": "Book not found!"};
+            reject(err);
+        }
+    });
+    myPromise.then((result) => {
+        res.send(result);
+    }).catch((err) => {
+        if (Object.hasOwn(err, "code")) {
+            return res.status(err.code).json({message: err.message});
+        } else {
+            return res.status(400).json({message: JSON.stringify(err)});
+        }
+    });
 });
 
 // Get book details based on author
 public_users.get('/author/:author', function (req, res) {
-    let publications = [];
-    for (let book of Object.values(books)) {
-        if (book.author === req.params.author) {
-            publications.push(book);
+    let myPromise = new Promise((resolve, reject) => {
+        let publications = [];
+        for (let book of Object.values(books)) {
+            if (book.author === req.params.author) {
+                publications.push(book);
+            }
         }
-    }
-    if (publications.length < 1) {
-        res.status(404).json({message: "Books not found"});
-    } else {
-        res.send(JSON.stringify(publications, null, 4));
-    }
+
+        if (publications.length > 0) {
+            const result = JSON.stringify(publications, null, 4);
+            resolve(result);
+        } else {
+            let err = {"code": 404, "message": "Books not found!"};
+            reject(err);
+        }
+    });
+    myPromise.then((result) => {
+        res.send(result);
+    }).catch((err) => {
+        if (Object.hasOwn(err, "code")) {
+            return res.status(err.code).json({message: err.message});
+        } else {
+            return res.status(400).json({message: JSON.stringify(err)});
+        }
+    });
 });
 
 // Get all books based on title
 public_users.get('/title/:title', function (req, res) {
-    let titles = [];
-    for (let book of Object.values(books)) {
-        if (book.title === req.params.title) {
-            titles.push(book);
+    let myPromise = new Promise((resolve, reject) => {
+        let titles = [];
+        for (let book of Object.values(books)) {
+            if (book.title === req.params.title) {
+                titles.push(book);
+            }
         }
-    }
-    if (titles.length < 1) {
-        res.status(404).json({message: "Books not found"});
-    } else {
-        res.send(JSON.stringify(titles, null, 4));
-    }
+
+        if (titles.length > 0) {
+            const result = JSON.stringify(titles, null, 4);
+            resolve(result);
+        } else {
+            let err = {"code": 404, "message": "Books not found!"};
+            reject(err);
+        }
+    });
+    myPromise.then((result) => {
+        res.send(result);
+    }).catch((err) => {
+        if (Object.hasOwn(err, "code")) {
+            return res.status(err.code).json({message: err.message});
+        } else {
+            return res.status(400).json({message: JSON.stringify(err)});
+        }
+    });
 });
 
 //  Get book review
@@ -79,7 +128,7 @@ public_users.get('/review/:isbn', function (req, res) {
         res.status(404).json({message: "Book not found"});
         return;
     }
-    if (reviews.length === 0){
+    if (reviews.length === 0) {
         res.status(404).json({message: "This book has no reviews"});
     } else {
         res.send(reviews);
