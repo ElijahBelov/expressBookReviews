@@ -2,7 +2,7 @@ const express = require('express');
 let books = require("../tools/booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
-let getBookByISBN = require("../tools/findBooks.js").getBookByISBN();
+let getBookByISBN = require("../tools/findBooks.js").getBookByISBN;
 const public_users = express.Router();
 
 
@@ -75,7 +75,6 @@ public_users.get('/review/:isbn', function (req, res) {
     let reviews = '';
     if (Object.hasOwn(books, req.params.isbn)) {
         reviews = JSON.stringify(books[req.params.isbn].reviews, null, 4);
-        console.log(reviews);
     } else {
         res.status(404).json({message: "Book not found"});
         return;

@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 let books = require("../tools/booksdb.js");
+let getBookByISBN = require("../tools/findBooks.js").getBookByISBN;
 const regd_users = express.Router();
 
 let users = [];
@@ -46,14 +47,34 @@ regd_users.post("/login", (req, res) => {
         }
         return res.status(200).send("User successfully logged in");
     } else {
-        return res.status(208).json({message: "Invalid Login. Check username and password"});
+        return res.status(401).json({message: "Invalid Login. Check username and password"});
     }
+});
+
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    let book = getBookByISBN(req.params.isbn);
+    let user = req.session.authorization.username;
+    if(book === null){
+        return res.status(404).json({message: "Book not found"});
+    }
+    if(Object.hasOwn(book.reviews, user)){
+        delete book.reviews[user];
+        res.send("Review deleted successfully.");
+    } else {
+        res.send("Review not found.");
+    }
+
 });
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-    //Write your code here
-    return res.status(300).json({message: "Yet to be implemented"});
+    let book = getBookByISBN(req.params.isbn);
+    let user = req.session.authorization.username;
+    if(book === null){
+        return res.status(404).json({message: "Book not found"});
+    }
+    book.reviews[user] = req.body.review;
+    res.send("Review posted successfully!");
 });
 
 module.exports.authenticated = regd_users;
